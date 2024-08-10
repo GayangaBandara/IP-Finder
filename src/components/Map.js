@@ -10,17 +10,30 @@ const containerStyle = {
   height: "400px",
 };
 
-const Map = ({ lat, lon }) => {
+const darkModeOptions = {
+  styles: [
+    // Custom map styles for dark mode can be added here.
+    { elementType: "geometry", stylers: [{ color: "#212121" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+    // Add more customization as needed
+  ],
+};
+
+const Map = ({ lat, lon, darkMode }) => {
   const center = {
     lat: lat,
     lng: lon,
   };
 
   return (
-    <LoadScript googleMapsApiKey="AIzaSyDlDgLUIfGOg43875IhmJmd2rXQ8BF-_cI">
-      {" "}
-      {/* Ensure the API key is correctly set */}
-      <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={14}>
+    <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={center}
+        zoom={14}
+        options={darkMode ? darkModeOptions : {}}
+      >
         <AdvancedMarker position={center} />
       </GoogleMap>
     </LoadScript>
