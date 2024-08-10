@@ -1,7 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import Axios from 'axios';
 import Map from './components/Map';
+import Navbar from './components/Navbar';
+import IPDetails from './components/IPDetails';
 import './App.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
 
 function App() {
     const [ipDetails, setIpDetails] = useState({});
@@ -9,6 +13,14 @@ function App() {
     const [lon, setLon] = useState(88.3832);
     const [darkMode, setDarkMode] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [history, setHistory] = useState([]);
+
+    useEffect(() => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
+        document.head.appendChild(link);
+    }, []);
 
     const fetchIpDetails = async () => {
         setLoading(true);
@@ -17,6 +29,7 @@ function App() {
             setIpDetails(res.data);
             setLat(res.data.latitude);
             setLon(res.data.longitude);
+            setHistory(prev => [...new Set([res.data.ip, ...prev])].slice(0, 5));
         } catch (error) {
             console.error('Error fetching IP details:', error);
         } finally {
@@ -24,35 +37,22 @@ function App() {
         }
     };
 
-    useEffect(() => {
-        // Optional: Fetch IP details on load if desired
-        // fetchIpDetails();
-    }, []);
-
     const toggleDarkMode = () => {
         setDarkMode(prevMode => !prevMode);
     };
 
     return (
         <div className={darkMode ? 'App dark-mode' : 'App'}>
-            <button className="dark-mode-toggle" onClick={toggleDarkMode}>
-                {darkMode ? 'Light Mode' : 'Dark Mode'}
-            </button>
-            <h1 className="heading">IP Address Finder</h1>
-            <button className="generate-button" onClick={fetchIpDetails} disabled={loading}>
-                {loading ? 'Fetching...' : 'Generate IP Details'}
-            </button>
-            <div className="left">
-                <h4>What is my IPv4 address?</h4>
-                <h1 id="ip">{ipDetails.ip}</h1>
-                <h4>Approximate location: </h4>
-                <p>
-                    {ipDetails.city}, {ipDetails.region}, {ipDetails.country_name}.
-                </p>
-                <h4>Internet Service Provider (ISP):</h4>
-                <p>{ipDetails.org}</p>
+            <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+            <div className="content">
+                <IPDetails 
+                    ipDetails={ipDetails} 
+                    fetchIpDetails={fetchIpDetails} 
+                    loading={loading} 
+                    history={history} 
+                />
+                <Map lat={lat} lon={lon} darkMode={darkMode} />
             </div>
-            <Map lat={lat} lon={lon} />
         </div>
     );
 }
